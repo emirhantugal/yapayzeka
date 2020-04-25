@@ -1,0 +1,96 @@
+#include "stdafx.h"
+#include <stdio.h>
+#include <limits.h>
+
+
+// Graftaki düğüm sayısını V global değişkeni ile ifade edeceğiz.
+#define V 9
+
+//En kısa yolu bulan yardımcı fonksiyon.
+//Ziyaret edilmemiş düğümler içerisindeki en kısa maliyetli düğümü return ediyor.
+int minDistance(int dist[], bool sptSet[])
+{
+    //İlk başta Sonsuz değer atıyoruz.
+    int min = INT_MAX, min_index;
+    //Aşağıdaki döngü ziyaret edilmemiş düğümler içerisinde min değerinden daha küçük
+    //düğümleri tespit ediyor. En küçüğünü buluyor.
+    for (int v = 0; v < V; v++)
+        if (sptSet[v] == false && dist[v] <= min)
+            min = dist[v], min_index = v;
+
+    //En küçük düğümün indexini return ediyoruz.
+    return min_index;
+}
+
+// Başlangıç noktasından diğer düğümlere olan maliyeti yazdıran fonksiyon.
+int printSolution(int dist[], int n)
+{
+    printf("Dugumlerin ana kaynağa olan uzakligi");
+    for (int i = 0; i < V; i++)
+        printf("%d tt %dn", i, dist[i]);
+}
+
+// Dijkstra algoritmasının temel fonksiyonu
+// Ağırlıklı graf yapımızı graph[V][V] dizisinde tutuyoruz
+// int src ise başlangıç noktamız.
+void dijkstra(int graph[V][V], int src)
+{
+    int dist[V];     //Başlangıç düğümünden bir başka düğüme olan uzaklığı burada tutacağız.
+
+    bool sptSet[V];  //Düğüm ziyaret edildiğinde bu diziye aktarıyoruz. Böylece ziyaret edilmiş düğümleri kontrol edebileceğiz.
+
+
+    //İlk başta Tüm düğümleri ziyaret edilmemiş olarak işaretliyoruz.
+    for (int i = 0; i < V; i++)
+        dist[i] = INT_MAX, sptSet[i] = false;
+
+    //Başlangıç noktasının maliyeti her zaman sıfır olur.
+    dist[src] = 0;
+
+    // Tüm düğümlere olan uzaklığın (kaynaktan) bulunacağı döngüye giriş yapıyoruz.
+    for (int count = 0; count < V - 1; count++)
+    {
+        // Henüz ziyaret edilmemiş, en az maliyetli düğümü u değişkenine aktarıyoruz.
+        int u = minDistance(dist, sptSet);
+
+        // Bu düğümü (aslında indisini) ziyaret edildi olarak işaretliyoruz.
+        sptSet[u] = true;
+
+        // Mevcut düğümden diğer komşu düğümleri tarayan döngümüz
+        for (int v = 0; v < V; v++)
+
+            // !sptSet[v] => Eğer düğüm ziyaret edilmediyse VE 
+            // graph[u][v] => Graf üzerinde bu nokta bulunuyorsa VE
+            // dist[u] != INT_MAX ==> Maliyet Sonsuz değilse VE
+            // ist[u]+graph[u][v] < dist[v] => Mevcut uzaklıktan küçükse
+            if (!sptSet[v] && graph[u][v] && dist[u] != INT_MAX
+                && dist[u] + graph[u][v] < dist[v])
+
+                //Uzaklığı güncelliyoruz.
+                dist[v] = dist[u] + graph[u][v];
+    }
+
+    // Kaynağa olan uzaklığı ekrana bastırıyoruz.
+    printSolution(dist, V);
+}
+
+// driver program to test above function
+int main()
+{
+    /* Ağırlıklı Graf Yapımızı  aşağıdaki gibi oluşturduk*/
+    int graph[V][V] = { {0, 4, 0, 0, 0, 0, 0, 8, 0},
+                       {4, 0, 8, 0, 0, 0, 0, 11, 0},
+                       {0, 8, 0, 7, 0, 4, 0, 0, 2},
+                       {0, 0, 7, 0, 9, 14, 0, 0, 0},
+                       {0, 0, 0, 9, 0, 10, 0, 0, 0},
+                       {0, 0, 4, 14, 10, 0, 2, 0, 0},
+                       {0, 0, 0, 0, 0, 2, 0, 1, 6},
+                       {8, 11, 0, 0, 0, 0, 1, 0, 7},
+                       {0, 0, 2, 0, 0, 0, 6, 7, 0}
+    };
+
+    //0 düğümünü başlangıç noktası olarak belirttik.
+    dijkstra(graph, 0);
+
+    return 0;
+}
